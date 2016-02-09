@@ -94,6 +94,12 @@ def make_arg_parser():
     get_parser.add_argument("-n", "--no-comments",
                             action="store_true",
                             help='do not show comments')
+    get_parser.add_argument("-r", "--reverse-comments",
+                            action='store_true',
+                            help='Put comments in reverse order', default=False)
+    get_parser.add_argument("-c", "--clever-comments",
+                            action='store_true',
+                            help='Show first comment first, then comments in reverse order', default=False)
     get_parser.set_defaults(func=bugz.cli.get)
 
     login_parser = subparsers.add_parser('login',
@@ -353,6 +359,13 @@ def make_arg_parser():
         action='store_true',
         help='format results as newline separated json records',
         default=False)
+
+    search_parser.add_argument(
+        '--sort',
+        action='append',
+        help='Sort by these keys',
+        default=None)
+
 
     search_parser.set_defaults(func=bugz.cli.search)
 

@@ -216,11 +216,22 @@ def show_bug_info(bug, settings):
         'cc': 'CC',
         'see_also': 'See Also',
     }
-    SkipFields = ['is_open', 'id', 'is_confirmed',
+    SkipFields = ['is_open', 'is_confirmed',
                   'is_creator_accessible', 'is_cc_accessible',
                   'update_token']
 
-    for field in bug:
+    FieldOrder = ['id', 'product', 'component', 'summary', 'status', 'resolution', 'priority', 'creation_time', 'reporter',  'blocks', 'assigned_to']
+
+    def field_cmp(x, y):
+        return {
+            (False, False): cmp(x, y),
+            (False, True): -1,
+            (True, False): 1,
+            (True, True): cmp(FieldOrder.index(x), FieldOrder.index(y))
+        } [x in FieldOrder, y in FieldOrder]
+
+    for field in sorted(bug, key=lambda x: FieldOrder.index(x) if x in FieldOrder else 100):
+
         if field in SkipFields:
             continue
         if field in FieldMap:
@@ -256,11 +267,19 @@ def show_bug_info(bug, settings):
         bug_comments = bug_comments['bugs']['%s' % bug['id']]['comments']
         print('%-12s: %d' % ('Comments', len(bug_comments)))
         print()
-        i = 0
         wrapper = textwrap.TextWrapper(width=settings.columns,
                                        break_long_words=False,
                                        break_on_hyphens=False)
-        for comment in bug_comments:
+
+        bug_comments = list(enumerate(bug_comments))
+
+        if settings.clever_comments:
+            bug_comments = bug_comments[:1] + bug_comments[:1:-1]
+
+        elif settings.reverse_comments:
+            bug_comments = bug_comments[::-1]
+
+        for i, comment in bug_comments:
             who = comment['creator']
             when = comment['time']
             what = comment['text']
@@ -673,7 +692,7 @@ the keywords given on the title (or the body if specified).
     """
     valid_keys = ['alias', 'assigned_to', 'component', 'creator',
                   'limit', 'offset', 'op_sys', 'platform',
-                  'priority', 'product', 'resolution', 'severity',
+                  'priority', 'product', 'resoluion', 'severity',
                   'version', 'whiteboard']
 
     params = {}
@@ -701,6 +720,9 @@ the keywords given on the title (or the body if specified).
 
     if hasattr(settings, 'not_status'):
         result = list(b for b in result if b['status'] not in settings.not_status)
+
+    if settings.sort:
+        result.sort(key=lambda r: tuple(r.get(k) for k in settings.sort))
 
     if not len(result):
         log_info('No bugs found.')
