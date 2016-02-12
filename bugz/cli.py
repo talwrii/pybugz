@@ -40,6 +40,10 @@ try:
 except ImportError:
     pass
 
+def write(msg):
+    "Seriously python 3 - this is *stupid*"
+    sys.stdout.buffer.write((msg + "\n").encode('utf-8'))
+
 def list_bugs(buglist, settings):
 	fmt = settings.format
 	if fmt is None:
@@ -56,7 +60,7 @@ def list_bugs(buglist, settings):
 	for bug in buglist:
 		bug['short_assigned_to'] = bug['assigned_to'].split('@')[0]
 
-		print(fmt.format(bug=bug)[:settings.columns])
+		write(fmt.format(bug=bug)[:settings.columns])
 	log_info("%i bug(s) found." % len(buglist))
 
 def json_records(buglist):
