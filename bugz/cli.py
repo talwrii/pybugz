@@ -68,7 +68,7 @@ def json_records(buglist):
 		for k, v in list(bug.items()):
 			if isinstance(v, xmlrpc.client.DateTime):
 				bug[k] = str(v)
-		print(json.dumps(bug))
+		write(json.dumps(bug))
 
 def prompt_for_bug(settings):
     """ Prompt for the information for a bug
@@ -245,32 +245,32 @@ def show_bug_info(bug, settings):
         value = bug[field]
         if field in ['cc', 'see_also']:
             for x in value:
-                print('%-12s: %s' % (desc, x))
+                write('%-12s: %s' % (desc, x))
         elif isinstance(value, list):
             s = ', '.join(["%s" % x for x in value])
             if s:
-                print('%-12s: %s' % (desc, s))
+                write('%-12s: %s' % (desc, s))
         elif value is not None and value != '':
-            print('%-12s: %s' % (desc, value))
+            write('%-12s: %s' % (desc, value))
 
     if not hasattr(settings, 'no_attachments'):
         params = {'ids': [bug['id']]}
         bug_attachments = settings.call_bz(settings.bz.Bug.attachments, params)
         bug_attachments = bug_attachments['bugs']['%s' % bug['id']]
-        print('%-12s: %d' % ('Attachments', len(bug_attachments)))
-        print()
+        write('%-12s: %d' % ('Attachments', len(bug_attachments)))
+        write()
         for attachment in bug_attachments:
             aid = attachment['id']
             desc = attachment['summary']
             when = attachment['creation_time']
-            print('[Attachment] [%s] [%s]' % (aid, desc))
+            write('[Attachment] [%s] [%s]' % (aid, desc))
 
     if not hasattr(settings, 'no_comments'):
         params = {'ids': [bug['id']]}
         bug_comments = settings.call_bz(settings.bz.Bug.comments, params)
         bug_comments = bug_comments['bugs']['%s' % bug['id']]['comments']
-        print('%-12s: %d' % ('Comments', len(bug_comments)))
-        print()
+        write('%-12s: %d' % ('Comments', len(bug_comments)))
+        write()
         wrapper = textwrap.TextWrapper(width=settings.columns,
                                        break_long_words=False,
                                        break_on_hyphens=False)
@@ -287,8 +287,8 @@ def show_bug_info(bug, settings):
             who = comment['creator']
             when = comment['time']
             what = comment['text']
-            print('[Comment #%d] %s : %s' % (i, who, when))
-            print('-' * (settings.columns - 1))
+            write('[Comment #%d] %s : %s' % (i, who, when))
+            write('-' * (settings.columns - 1))
 
             if what is None:
                 what = ''
@@ -296,11 +296,11 @@ def show_bug_info(bug, settings):
             # print wrapped version
             for line in what.splitlines():
                 if len(line) < settings.columns:
-                    print(line)
+                    write(line)
                 else:
                     for shortline in wrapper.wrap(line):
-                        print(shortline)
-            print()
+                        write(shortline)
+            write()
             i += 1
 
 
@@ -366,7 +366,7 @@ def attachment(settings):
                                             result['file_name']))
 
     if view:
-        print(result['data'].data.decode('utf-8'))
+        write(result['data'].data.decode('utf-8'))
     else:
         if os.path.exists(result['file_name']):
             raise RuntimeError('Filename already exists')
@@ -596,33 +596,33 @@ def post(settings):
             append_command_output
 
     # print submission confirmation
-    print('-' * (settings.columns - 1))
-    print('%-12s: %s' % ('Product', settings.product))
-    print('%-12s: %s' % ('Component', settings.component))
-    print('%-12s: %s' % ('Title', settings.summary))
+    write('-' * (settings.columns - 1))
+    write('%-12s: %s' % ('Product', settings.product))
+    write('%-12s: %s' % ('Component', settings.component))
+    write('%-12s: %s' % ('Title', settings.summary))
     if hasattr(settings, 'version'):
-        print('%-12s: %s' % ('Version', settings.version))
-    print('%-12s: %s' % ('Description', settings.description))
+        write('%-12s: %s' % ('Version', settings.version))
+    write('%-12s: %s' % ('Description', settings.description))
     if hasattr(settings, 'op_sys'):
-        print('%-12s: %s' % ('Operating System', settings.op_sys))
+        write('%-12s: %s' % ('Operating System', settings.op_sys))
     if hasattr(settings, 'platform'):
-        print('%-12s: %s' % ('Platform', settings.platform))
+        write('%-12s: %s' % ('Platform', settings.platform))
     if hasattr(settings, 'priority'):
-        print('%-12s: %s' % ('Priority', settings.priority))
+        write('%-12s: %s' % ('Priority', settings.priority))
     if hasattr(settings, 'severity'):
-        print('%-12s: %s' % ('Severity', settings.severity))
+        write('%-12s: %s' % ('Severity', settings.severity))
     if hasattr(settings, 'alias'):
-        print('%-12s: %s' % ('Alias', settings.alias))
+        write('%-12s: %s' % ('Alias', settings.alias))
     if hasattr(settings, 'assigned_to'):
-        print('%-12s: %s' % ('Assigned to', settings.assigned_to))
+        write('%-12s: %s' % ('Assigned to', settings.assigned_to))
     if hasattr(settings, 'cc'):
-        print('%-12s: %s' % ('CC', settings.cc))
+        write('%-12s: %s' % ('CC', settings.cc))
     if hasattr(settings, 'url'):
-        print('%-12s: %s' % ('URL', settings.url))
+        write('%-12s: %s' % ('URL', settings.url))
     # fixme: groups
     # fixme: status
     # fixme: Milestone
-    print('-' * (settings.columns - 1))
+    write('-' * (settings.columns - 1))
 
     if not hasattr(settings, 'batch'):
         if settings.default_confirm in ['Y', 'y']:
@@ -672,7 +672,7 @@ def products(settings):
 		json_records(products)
 	else:
 		for product in products:
-			print(fmt.format(product=product)[:settings.columns])
+			write(fmt.format(product=product)[:settings.columns])
 
 def components(settings):
 	products = fetch_products(settings)
@@ -684,7 +684,7 @@ def components(settings):
 	else:
 		for product in products:
 			for component in product['components']:
-				print(fmt.format(product=product, component=component)[:settings.columns])
+				write(fmt.format(product=product, component=component)[:settings.columns])
 
 def fetch_products(settings):
     product_ids = settings.call_bz(settings.bz.Product.get_accessible_products, dict())['ids']
@@ -737,10 +737,10 @@ the keywords given on the title (or the body if specified).
 
 
 def connections(settings):
-    print('Known bug trackers:')
-    print()
+    write('Known bug trackers:')
+    write()
     for tracker in settings.connections:
-        print(tracker)
+        write(tracker)
 
 
 def main():
