@@ -385,9 +385,11 @@ def get(settings):
     params = {'ids': [settings.bugid]}
     result = settings.call_bz(settings.bz.Bug.get, params)
 
-    for bug in result['bugs']:
-        show_bug_info(bug, settings)
-
+    if settings.json:
+        json_records(result['bugs'])
+    else:
+        for bug in result['bugs']:
+            show_bug_info(bug, settings)
 
 def login(settings):
     """Authenticate a session.

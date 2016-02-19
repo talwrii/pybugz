@@ -100,6 +100,9 @@ def make_arg_parser():
     get_parser.add_argument("-c", "--clever-comments",
                             action='store_true',
                             help='Show first comment first, then comments in reverse order', default=False)
+    get_parser.add_argument("--json",
+                            action='store_true',
+                            help='Output beautiful machine readable json', default=False)
     get_parser.set_defaults(func=bugz.cli.get)
 
     login_parser = subparsers.add_parser('login',
