@@ -40,7 +40,7 @@ try:
 except ImportError:
     pass
 
-def write(msg):
+def write(msg=''):
     "Seriously python 3 - this is *stupid*"
     sys.stdout.buffer.write((msg + "\n").encode('utf-8'))
 
