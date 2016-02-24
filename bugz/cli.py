@@ -706,6 +706,11 @@ the keywords given on the title (or the body if specified).
     for key in d:
         if key in valid_keys:
             params[key] = d[key]
+
+    if 'after' in d:
+        # This seem to break when you include a time - but work for days
+        params['creation_time'] = d['after'].strftime("%Y%m%d")
+
     if 'status' in d:
         if 'all' not in d['status']:
             params['status'] = d['status']

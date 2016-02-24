@@ -1,7 +1,8 @@
 import argparse
+import datetime
+import subprocess
 
 import bugz.cli
-
 from bugz import __version__
 
 
@@ -300,15 +301,23 @@ def make_arg_parser():
                                help='The unique alias for this bug')
     search_parser.add_argument('-a', '--assigned-to',
                                help='email the bug is assigned to')
+
+    search_parser.add_argument('-A', '--after',
+                               type=fuzzy_date,
+                               help='Get bugs after this date'
+                               'returned by a search')
+
     search_parser.add_argument('-C', '--component',
                                action='append',
                                help='restrict by component (1 or more)')
     search_parser.add_argument('-r', '--creator',
                                help='email of the person who created the bug')
+
     search_parser.add_argument('-l', '--limit',
                                type=int,
                                help='Limit the number of records '
                                'returned by a search')
+
     search_parser.add_argument('--offset',
                                type=int,
                                help='Set the start position for a search')
@@ -373,3 +382,12 @@ def make_arg_parser():
     search_parser.set_defaults(func=bugz.cli.search)
 
     return parser
+
+
+def fuzzy_date(date_string):
+    "Parse dates like: '2 days ago'"
+    # There is no module to do this in python.
+    #   I have found specifying full dates sufficiently
+    #   onerous that it prevents me from using a tool.
+    cmd = ['date', '-d', date_string, '+%s']
+    return datetime.datetime.fromtimestamp(float(subprocess.check_output(cmd)))
