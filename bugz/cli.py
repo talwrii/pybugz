@@ -278,7 +278,7 @@ def show_bug_info(bug, settings):
         bug_comments = list(enumerate(bug_comments))
 
         if settings.clever_comments:
-            bug_comments = bug_comments[:1] + bug_comments[:1:-1]
+            bug_comments = bug_comments[:1] + bug_comments[:0:-1]
 
         elif settings.reverse_comments:
             bug_comments = bug_comments[::-1]
