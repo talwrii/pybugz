@@ -45,30 +45,30 @@ def write(msg=''):
     sys.stdout.buffer.write((msg + "\n").encode('utf-8'))
 
 def list_bugs(buglist, settings):
-	fmt = settings.format
-	if fmt is None:
-		fmt = '{bug[id]}'
-		if hasattr(settings, 'show_status'):
-			fmt += ' {bug[status]:>12}'
-		if hasattr(settings, 'show_priority'):
-			fmt += ' {bug[priority]:>12}'
-		if hasattr(settings, 'show_severity'):
-			fmt += ' {bug[severity]:>12}'
-		fmt += ' {bug[short_assigned_to]:>20}'
-		fmt += ' {bug[summary]}'
+    fmt = settings.format
+    if fmt is None:
+        fmt = '{bug[id]}'
+        if hasattr(settings, 'show_status'):
+            fmt += ' {bug[status]:>12}'
+        if hasattr(settings, 'show_priority'):
+            fmt += ' {bug[priority]:>12}'
+        if hasattr(settings, 'show_severity'):
+            fmt += ' {bug[severity]:>12}'
+        fmt += ' {bug[short_assigned_to]:>20}'
+        fmt += ' {bug[summary]}'
 
-	for bug in buglist:
-		bug['short_assigned_to'] = bug['assigned_to'].split('@')[0]
+    for bug in buglist:
+        bug['short_assigned_to'] = bug['assigned_to'].split('@')[0]
 
-		write(fmt.format(bug=bug)[:settings.columns])
-	log_info("%i bug(s) found." % len(buglist))
+        write(fmt.format(bug=bug)[:settings.columns])
+    log_info("%i bug(s) found." % len(buglist))
 
 def json_records(buglist):
-	for bug in buglist:
-		for k, v in list(bug.items()):
-			if isinstance(v, xmlrpc.client.DateTime):
-				bug[k] = str(v)
-		write(json.dumps(bug))
+    for bug in buglist:
+        for k, v in list(bug.items()):
+            if isinstance(v, xmlrpc.client.DateTime):
+                bug[k] = str(v)
+        write(json.dumps(bug))
 
 def prompt_for_bug(settings):
     """ Prompt for the information for a bug
@@ -666,31 +666,37 @@ def post(settings):
     log_info('Bug %d submitted' % result['id'])
 
 def products(settings):
-	products = fetch_products(settings)
-	fmt = settings.format
-	if fmt is None:
-		fmt = '{product[name]}'
-	if settings.json:
-		json_records(products)
-	else:
-		for product in products:
-			write(fmt.format(product=product)[:settings.columns])
+    products = fetch_products(settings)
+    fmt = settings.format
+    if fmt is None:
+        fmt = '{product[name]}'
+    if settings.json:
+        json_records(products)
+    else:
+        for product in products:
+            write(fmt.format(product=product)[:settings.columns])
 
 def components(settings):
-	products = fetch_products(settings)
-	fmt = settings.format
-	if fmt is None:
-		fmt = '{product[name]:>20} {component[name]:>20} {component[description]:>20}'
-	if settings.json:
-		json_records(products)
-	else:
-		for product in products:
-			for component in product['components']:
-				write(fmt.format(product=product, component=component)[:settings.columns])
+    products = fetch_products(settings)
+    fmt = settings.format
+    if fmt is None:
+        fmt = '{product[name]:>20} {component[name]:>20} {component[description]:>20}'
+    if settings.json:
+        json_records(products)
+    else:
+        for product in products:
+            for component in product['components']:
+                write(fmt.format(product=product, component=component)[:settings.columns])
 
 def fetch_products(settings):
     product_ids = settings.call_bz(settings.bz.Product.get_accessible_products, dict())['ids']
     return settings.call_bz(settings.bz.Product.get, dict(ids=product_ids))['products']
+
+def history(settings):
+    result = settings.call_bz(settings.bz.Bug.history, dict(ids=[settings.id]))
+    bug_info, = result['bugs']
+    history = bug_info['history']
+    json_records(history)
 
 def search(settings):
     """Performs a search on the bugzilla database with

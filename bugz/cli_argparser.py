@@ -290,9 +290,17 @@ def make_arg_parser():
         help='custom format. Format: {product[field]} (see --json)',
         default=None)
 
+    history_parser = subparsers.add_parser('history',
+                            argument_default=argparse.SUPPRESS,
+                            help='Get the history for a bug')
+    history_parser.add_argument('id', type=int)
+    history_parser.add_argument('--json', action='store_true', help='Output results in json')
+    history_parser.set_defaults(func=bugz.cli.history)
+
     search_parser = subparsers.add_parser('search',
                                           argument_default=argparse.SUPPRESS,
                                           help='search for bugs in bugzilla')
+
     search_parser.add_argument('terms',
                                nargs='*',
                                help='strings to search for in '
